@@ -1,0 +1,23 @@
+[package]
+name = "llm-content-blocks"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+description = "Typed fluent builder for Anthropic Messages-API content blocks (text, image, tool_use, tool_result, document). Emits the exact JSON shape the API expects. No SDK dependency."
+authors = ["Mukunda Rao Katta <mukunda.vjcs6@gmail.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/MukundaKatta/llm-content-blocks-rs"
+homepage = "https://github.com/MukundaKatta/llm-content-blocks-rs"
+documentation = "https://docs.rs/llm-content-blocks"
+readme = "README.md"
+keywords = ["anthropic", "claude", "llm", "content-blocks", "messages"]
+categories = ["api-bindings"]
+exclude = [".github/*", "target/*"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+
+[dev-dependencies]
+serde_json = "1"
