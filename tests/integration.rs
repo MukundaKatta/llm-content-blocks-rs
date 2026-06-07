@@ -134,9 +134,7 @@ fn tool_result_block_via_builder() {
 
 #[test]
 fn tool_result_block_is_error_flag_serializes() {
-    let out = Blocks::new()
-        .tool_result("u1", json!("boom"), true)
-        .build();
+    let out = Blocks::new().tool_result("u1", json!("boom"), true).build();
     let json = serde_json::to_value(&out).unwrap();
     assert_eq!(json[0]["is_error"], json!(true));
 }
@@ -328,4 +326,43 @@ fn json_output_matches_anthropic_tool_use_shape() {
             "input": {"q": "x"},
         }])
     );
+}
+
+#[test]
+fn json_output_matches_anthropic_document_b64_shape() {
+    // The Anthropic document base64 source shape:
+    // {"type": "document", "source": {"type": "base64", "media_type": "...", "data": "..."}}
+    let blocks = Blocks::new()
+        .document_b64(b"%PDF-", "application/pdf")
+        .unwrap()
+        .build();
+    let v = serde_json::to_value(&blocks).unwrap();
+    assert_eq!(v[0]["type"], "document");
+    assert_eq!(v[0]["source"]["type"], "base64");
+    assert_eq!(v[0]["source"]["media_type"], "application/pdf");
+    assert_eq!(v[0]["source"]["data"], BASE64_STANDARD.encode(b"%PDF-"));
+}
+
+// ---- builder lifecycle -------------------------------------------------
+
+#[test]
+fn default_matches_new_empty_builder() {
+    let mut builder = Blocks::default();
+    assert!(builder.is_empty());
+    assert_eq!(builder.len(), 0);
+    builder.text("x");
+    assert_eq!(builder.len(), 1);
+}
+
+#[test]
+fn build_drains_builder_so_second_call_is_empty() {
+    // Documented contract: build() takes &mut self and leaves the builder
+    // empty, so a second build() yields no blocks.
+    let mut builder = Blocks::new();
+    builder.text("first");
+    let first = builder.build();
+    assert_eq!(first.len(), 1);
+    let second = builder.build();
+    assert!(second.is_empty());
+    assert!(builder.is_empty());
 }
